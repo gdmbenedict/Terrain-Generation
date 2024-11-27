@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,11 +8,17 @@ public class MeshGenerator : MonoBehaviour
     [Header("Mesh Generation Variables")]
     [SerializeField] private int xSize;
     [SerializeField] private int zSize;
+    [SerializeField] private string stringSeed;
+    [SerializeField][Range(1, 10)] private float noiseScale = 1;
+    [SerializeField][Range(1, 10)] private int octaves;
+    [SerializeField][Range(0.0001f, 1)] private float persistance;
+    [SerializeField][Range(1, 10)] private float lacunarity;
 
     private Mesh mesh;
 
     private Vector3[] vertices;
     private int[] triangles;
+    private float[,] noiseMap;
 
     // Start is called before the first frame update
     void Start()
@@ -19,12 +26,35 @@ public class MeshGenerator : MonoBehaviour
         CreateMesh();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            CreateMesh();
+        }
+    }
+
     //Function that hadnles the entire process of creating a mesh
-    private void CreateMesh()
+    public void CreateMesh()
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
+        //get int seed
+        int intSeed;
+        if (String.IsNullOrEmpty(stringSeed))
+        {
+            intSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+        }
+        else
+        {
+            intSeed = StringToSeed(stringSeed);
+        }
+
+        //generate noise map
+        noiseMap = Noise.GenerateNoiseMap(xSize+1, zSize+1, intSeed, noiseScale, octaves, persistance, lacunarity);
+
+        //create mesh and update game
         CreateShape();
         UpdateMesh();
     }
@@ -41,7 +71,7 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x=0; x<= xSize; x++)
             {
-                vertices[i] = new Vector3(x, 0, z);
+                vertices[i] = new Vector3(x, noiseMap[x,z], z);
                 i++;
             }
         }
@@ -89,4 +119,14 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
+    private int StringToSeed(string input)
+    {
+        int intSeed = 0;
+        for (int i =0; i<input.Length; i++)
+        {
+            intSeed += input[i] - 0;
+        }
+
+        return intSeed;
+    }
 }
