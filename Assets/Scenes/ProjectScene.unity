@@ -357,8 +357,10 @@ MonoBehaviour:
   xSize: 20
   zSize: 20
   stringSeed: 
-  noiseScale: 1
-  octaves: 5
+  noiseScale: 0.33
+  octaves: 3
+  amplitude: 2.12
+  frequency: 0.19
   persistance: 0.5
   lacunarity: 2
 --- !u!23 &1398949723
