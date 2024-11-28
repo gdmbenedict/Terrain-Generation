@@ -9,7 +9,7 @@ public class MeshGenerator : MonoBehaviour
     [Header("Mesh Generation Variables")]
     [SerializeField][Range(1,250)] private int xSize;
     [SerializeField][Range(1,250)] private int zSize;
-    [SerializeField][Range(1,10)] private float verticalScale;
+    [SerializeField][Range(1,50)] private float verticalScale;
 
     [Header("Perlin Varaibles")]
     [SerializeField] private string stringSeed;
@@ -126,7 +126,7 @@ public class MeshGenerator : MonoBehaviour
             vert++; //used to stop generator from making mesh connection between rows
         }
 
-        //Setting UVs
+        //Setting Colors
         colors = new Color[vertices.Length];
         for (int i = 0, z = 0; z <= zSize; z++)
         {
@@ -148,6 +148,7 @@ public class MeshGenerator : MonoBehaviour
         //update points
         mesh.vertices = vertices;
         mesh.triangles = triangles;
+        mesh.colors = colors;
 
         //calculate normals for mesh
         mesh.RecalculateNormals();
