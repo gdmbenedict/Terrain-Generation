@@ -361,8 +361,8 @@ MonoBehaviour:
   perlinScale: 3
   offSetRange: 50
   octaves: 3
-  persistance: 0.3
-  lacunarity: 2
+  persistance: 0.25
+  lacunarity: 3
 --- !u!23 &1398949723
 MeshRenderer:
   m_ObjectHideFlags: 0

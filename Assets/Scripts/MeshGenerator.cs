@@ -9,7 +9,7 @@ public class MeshGenerator : MonoBehaviour
     [Header("Mesh Generation Variables")]
     [SerializeField] private int xSize;
     [SerializeField] private int zSize;
-    [SerializeField][Range(1,10)] private float verticleScale;
+    [SerializeField][Range(1,100)] private float verticleScale;
 
     [Header("Perlin Varaibles")]
     [SerializeField] private string stringSeed;
@@ -53,6 +53,12 @@ public class MeshGenerator : MonoBehaviour
     //function that handles creating the shape of the mesh
     private void CreateShape()
     {
+        //setting initial seed
+        if (!String.IsNullOrEmpty(stringSeed))
+        {
+            UnityEngine.Random.InitState(StringToSeed(stringSeed));
+        }
+
         //randomly generate offsets
         offsets = new Vector2[octaves];
         for (int i=0; i<octaves; i++)
@@ -141,8 +147,10 @@ public class MeshGenerator : MonoBehaviour
         {
             //get position of perlin noise sample
             float xCoord = posX / xSize * frequency * perlinScale + offsets[i].x;
-            float zCoord = posZ / zSize * frequency * perlinScale + offsets[i].y; 
+            float zCoord = posZ / zSize * frequency * perlinScale + offsets[i].y;
 
+            float perlinValue = Mathf.PerlinNoise(xCoord, zCoord) * 2 - 1; //get value on a scale of -1 tp 1
+            Debug.Log(perlinValue);
             height += Mathf.PerlinNoise(xCoord, zCoord) * amplitude; //add height from octave to result
 
             frequency *= lacunarity; //increase the frequency of changes with each octave
