@@ -354,9 +354,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb7d2e5ac4dc39940b6c825ed439fc4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xSize: 100
-  zSize: 100
-  verticleScale: 5
+  xSize: 1000
+  zSize: 1000
+  verticleScale: 10
   stringSeed: 
   perlinScale: 3
   offSetRange: 50

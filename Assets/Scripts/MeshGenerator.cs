@@ -7,9 +7,9 @@ using UnityEngine;
 public class MeshGenerator : MonoBehaviour
 {
     [Header("Mesh Generation Variables")]
-    [SerializeField] private int xSize;
-    [SerializeField] private int zSize;
-    [SerializeField][Range(1,100)] private float verticleScale;
+    [SerializeField][Range(1,250)] private int xSize;
+    [SerializeField][Range(1,250)] private int zSize;
+    [SerializeField][Range(1,10)] private float verticleScale;
 
     [Header("Perlin Varaibles")]
     [SerializeField] private string stringSeed;
@@ -78,7 +78,6 @@ public class MeshGenerator : MonoBehaviour
             for (int x=0; x<= xSize; x++)
             {
                 vertexHeight = GenerateHeight(x,z) * verticleScale; //generating heigh according to perlin noise
-                Debug.Log(vertexHeight);
                 vertices[i] = new Vector3(x, vertexHeight, z); //assign vertices
                 i++;
             }
