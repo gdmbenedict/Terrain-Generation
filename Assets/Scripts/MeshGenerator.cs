@@ -78,6 +78,7 @@ public class MeshGenerator : MonoBehaviour
             for (int x=0; x<= xSize; x++)
             {
                 vertexHeight = GenerateHeight(x,z) * verticleScale; //generating heigh according to perlin noise
+                Debug.Log(vertexHeight);
                 vertices[i] = new Vector3(x, vertexHeight, z); //assign vertices
                 i++;
             }
@@ -150,8 +151,7 @@ public class MeshGenerator : MonoBehaviour
             float zCoord = posZ / zSize * frequency * perlinScale + offsets[i].y;
 
             float perlinValue = Mathf.PerlinNoise(xCoord, zCoord) * 2 - 1; //get value on a scale of -1 tp 1
-            Debug.Log(perlinValue);
-            height += Mathf.PerlinNoise(xCoord, zCoord) * amplitude; //add height from octave to result
+            height += perlinValue * amplitude; //add height from octave to result
 
             frequency *= lacunarity; //increase the frequency of changes with each octave
             amplitude *= persistance; //decrease magnitude of changes with each octave
