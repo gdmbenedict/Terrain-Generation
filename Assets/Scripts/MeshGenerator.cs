@@ -9,7 +9,12 @@ public class MeshGenerator : MonoBehaviour
     [Header("Mesh Generation Variables")]
     [SerializeField] private int xSize;
     [SerializeField] private int zSize;
+
+    [Header("Perlin Varaibles")]
     [SerializeField] private string stringSeed;
+    [SerializeField][Range(1,100)] private float perlinScale;
+    [SerializeField][Range(0,100)] private float offSetRange;
+    private Vector2 offset;
 
     private Mesh mesh;
 
@@ -44,16 +49,23 @@ public class MeshGenerator : MonoBehaviour
     //function that handles creating the shape of the mesh
     private void CreateShape()
     {
+        //randomly generate offset
+        float xOffset = UnityEngine.Random.Range(-offSetRange, offSetRange);
+        float yOffset = UnityEngine.Random.Range(-offSetRange, offSetRange);
+        offset = new Vector2(xOffset, yOffset);
+
         //declaring array size
         vertices = new Vector3[(xSize + 1) * (zSize + 1)];
 
         //looping through points to create vertices
         int i = 0;
+        float vertexHeight = 0;
         for (int z=0; z<= zSize; z++)
         {
             for (int x=0; x<= xSize; x++)
             {
-                vertices[i] = new Vector3(x, 0, z);
+                vertexHeight = GenerateHeight(x,z);
+                vertices[i] = new Vector3(x, vertexHeight, z);
                 i++;
             }
         }
@@ -110,5 +122,16 @@ public class MeshGenerator : MonoBehaviour
         }
 
         return intSeed;
+    }
+
+    private float GenerateHeight(float posX, float posZ)
+    {
+        float height = 0; //height returned
+        float xCoord = posX / xSize * perlinScale + offset.x;
+        float zCoord = posZ / zSize * perlinScale + offset.y;
+
+        height = Mathf.PerlinNoise(xCoord, zCoord);
+
+        return height;
     }
 }
