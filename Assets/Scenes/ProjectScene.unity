@@ -354,9 +354,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb7d2e5ac4dc39940b6c825ed439fc4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xSize: 20
-  zSize: 20
+  xSize: 100
+  zSize: 100
+  verticleScale: 5
   stringSeed: 
+  perlinScale: 3
+  offSetRange: 50
+  octaves: 3
+  persistance: 0.3
+  lacunarity: 2
 --- !u!23 &1398949723
 MeshRenderer:
   m_ObjectHideFlags: 0
