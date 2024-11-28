@@ -9,7 +9,7 @@ public class MeshGenerator : MonoBehaviour
     [Header("Mesh Generation Variables")]
     [SerializeField][Range(1,250)] private int xSize;
     [SerializeField][Range(1,250)] private int zSize;
-    [SerializeField][Range(1,10)] private float verticleScale;
+    [SerializeField][Range(1,10)] private float verticalScale;
 
     [Header("Perlin Varaibles")]
     [SerializeField] private string stringSeed;
@@ -20,10 +20,16 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField][Range(1,10)] private float lacunarity;
     private Vector2[] offsets;
 
+    [Header("Terrain Visuals")]
+    [SerializeField] private Gradient gradient;
+    private float maxHeight;
+    private float minHeight;
+
     private Mesh mesh;
 
-    private Vector3[] vertices;
-    private int[] triangles;
+    private Vector3[] vertices; //all coordinates for the texture
+    private int[] triangles; //all the tris the mesh is made of
+    private Color[] colors;
 
     // Start is called before the first frame update
     void Start()
@@ -77,11 +83,20 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x=0; x<= xSize; x++)
             {
-                vertexHeight = GenerateHeight(x,z) * verticleScale; //generating heigh according to perlin noise
+                vertexHeight = GenerateHeight(x,z) * verticalScale; //generating heigh according to perlin noise
                 vertices[i] = new Vector3(x, vertexHeight, z); //assign vertices
                 i++;
             }
         }
+
+        //get max and min height;
+        float persistanceFactor = 0;
+        for (int i=0; i<octaves; i++)
+        {
+            persistanceFactor += MathF.Pow(persistance, i); 
+        }
+        minHeight = -persistanceFactor * verticalScale;
+        maxHeight = persistanceFactor * verticalScale;
 
         //declaring triangles array
         triangles = new int[xSize * zSize * 6];
@@ -109,7 +124,19 @@ public class MeshGenerator : MonoBehaviour
             }
 
             vert++; //used to stop generator from making mesh connection between rows
-        }         
+        }
+
+        //Setting UVs
+        colors = new Color[vertices.Length];
+        for (int i = 0, z = 0; z <= zSize; z++)
+        {
+            for (int x = 0; x <= xSize; x++)
+            {
+                float height = Mathf.InverseLerp(minHeight, maxHeight, vertices[i].y); //get where on the scale this height is using inverse lerp (smallest = 0, largest = 1)
+                colors[i] = gradient.Evaluate(height);
+                i++;
+            }
+        }
     }
 
     //Function that updates 
