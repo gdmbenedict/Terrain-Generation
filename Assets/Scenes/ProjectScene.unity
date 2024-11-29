@@ -420,6 +420,8 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 8
     m_NumAlphaKeys: 2
+  waterVisual: {fileID: 6421669208082051375, guid: 858f1ef9ce41c264a8706e5bb408942b, type: 3}
+  waterLevel: 0
 --- !u!23 &1398949723
 MeshRenderer:
   m_ObjectHideFlags: 0

@@ -31,6 +31,12 @@ public class MeshGenerator : MonoBehaviour
     private float maxHeight;
     private float minHeight;
 
+    [Header("Water")]
+    [SerializeField] private GameObject waterVisual;
+    [SerializeField][Range(-50, 0)] private float waterLevel;
+    private Vector2 waterOffset;
+    private GameObject waterInstance;
+
     private Mesh mesh;
 
     private Vector3[] vertices; //all coordinates for the texture
@@ -40,15 +46,21 @@ public class MeshGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CreateMesh();
+        GenerateTerrain();
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            CreateMesh();
+            GenerateTerrain();
         }
+    }
+
+    public void GenerateTerrain()
+    {
+        CreateMesh();
+        GenerateWater();
     }
 
     //Function that hadnles the entire process of creating a mesh
@@ -211,7 +223,14 @@ public class MeshGenerator : MonoBehaviour
         height -= falloffMap[posX, posZ];
 
         //applying bounds
-        Mathf.Clamp(height, minHeight, maxHeight);
+        if (height < minHeight)
+        {
+            height = minHeight;
+        }
+        else if (height > maxHeight)
+        {
+            height = maxHeight;
+        }
 
         return height;
     }
@@ -244,6 +263,29 @@ public class MeshGenerator : MonoBehaviour
     private float ApplyFalloffCurve(float x)
     {
         return Mathf.Pow(x, falloffExponent) / (Mathf.Pow(x, falloffExponent) + Mathf.Pow(falloffMultiplier - x * falloffMultiplier, falloffExponent)); ;
+    }
+
+    //function that places and scales water
+    private void GenerateWater()
+    {
+        if (waterInstance != null)
+        {
+            Destroy(waterInstance);
+        }
+
+        //find offset and instantiate object and parent to self
+        waterOffset = new Vector2(xSize * 0.001f, zSize * 0.001f);
+        waterInstance = Instantiate(waterVisual, gameObject.transform);
+
+        //setting position
+        Vector3 pos = new Vector3(waterOffset.x, minHeight * verticalScale, waterOffset.y);
+        waterInstance.transform.position = pos;
+
+        //scale wate visual
+        float xScale = xSize - 2 * waterOffset.x;
+        float yScale = waterLevel - minHeight * verticalScale;
+        float zScale = zSize - 2 * waterOffset.y;
+        waterInstance.transform.localScale = new Vector3(xScale, yScale, zScale);
     }
 
 
