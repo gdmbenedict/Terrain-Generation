@@ -387,6 +387,9 @@ MonoBehaviour:
   octaves: 3
   persistance: 0.15
   lacunarity: 3
+  applyFalloff: 1
+  falloffExponent: 3
+  falloffMultiplier: 2
   gradient:
     serializedVersion: 2
     key0: {r: 0.79215693, g: 0.7411765, b: 0.5764706, a: 1}

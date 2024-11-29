@@ -20,6 +20,12 @@ public class MeshGenerator : MonoBehaviour
     [SerializeField][Range(1,10)] private float lacunarity;
     private Vector2[] offsets;
 
+    [Header("Falloff Variables")]
+    [SerializeField] private bool applyFalloff;
+    [SerializeField][Range(1,5)] private float falloffExponent;
+    [SerializeField][Range(0, 10)] private float falloffMultiplier;
+    private float[,] falloffMap;
+
     [Header("Terrain Visuals")]
     [SerializeField] private Gradient gradient;
     private float maxHeight;
@@ -77,26 +83,31 @@ public class MeshGenerator : MonoBehaviour
         //declaring array size
         vertices = new Vector3[(xSize + 1) * (zSize + 1)];
 
+        //get max and min height;
+        float persistanceFactor = 0;
+        for (int i = 0; i < octaves; i++)
+        {
+            persistanceFactor += MathF.Pow(persistance, i);
+            Debug.Log(persistanceFactor);
+        }
+        minHeight = -persistanceFactor;
+        maxHeight = persistanceFactor;
+
+        //generating falloff map for use
+        falloffMap = GenerateFalloffMap();
+
         //looping through points to create vertices
         float vertexHeight = 0;
         for (int i = 0, z=0; z<= zSize; z++)
         {
             for (int x=0; x<= xSize; x++)
             {
+                //vertex height generation
                 vertexHeight = GenerateHeight(x,z) * verticalScale; //generating heigh according to perlin noise
                 vertices[i] = new Vector3(x, vertexHeight, z); //assign vertices
                 i++;
             }
         }
-
-        //get max and min height;
-        float persistanceFactor = 0;
-        for (int i=0; i<octaves; i++)
-        {
-            persistanceFactor += MathF.Pow(persistance, i); 
-        }
-        minHeight = -persistanceFactor * verticalScale;
-        maxHeight = persistanceFactor * verticalScale;
 
         //declaring triangles array
         triangles = new int[xSize * zSize * 6];
@@ -132,7 +143,7 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x = 0; x <= xSize; x++)
             {
-                float height = Mathf.InverseLerp(minHeight, maxHeight, vertices[i].y); //get where on the scale this height is using inverse lerp (smallest = 0, largest = 1)
+                float height = Mathf.InverseLerp(minHeight * verticalScale, maxHeight * verticalScale, vertices[i].y); //get where on the scale this height is using inverse lerp (smallest = 0, largest = 1)
                 colors[i] = gradient.Evaluate(height);
                 i++;
             }
@@ -154,6 +165,7 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
+    //Function that converts a string to an int (for the purposes of creating a seed for generation
     private int StringToSeed(string input)
     {
         int intSeed = 0;
@@ -165,25 +177,74 @@ public class MeshGenerator : MonoBehaviour
         return intSeed;
     }
 
-    private float GenerateHeight(float posX, float posZ)
+    private float GenerateHeight(int posX, int posZ)
     {
         float height = 0; //height returned
         float frequency = 1f; //base frequency
         float amplitude = 1f; //base amplitude
 
-        for (int i=0; i<octaves; i++)
+        //bring down border
+        if (posX == 0 || posZ == 0 || posX == xSize || posZ == zSize)
         {
-            //get position of perlin noise sample
-            float xCoord = posX / xSize * frequency * perlinScale + offsets[i].x;
-            float zCoord = posZ / zSize * frequency * perlinScale + offsets[i].y;
+            height = minHeight;
+            //Debug.Log(minHeight);
+            //Debug.Log(maxHeight);
+        }
+        //regular generation
+        else
+        {
+            for (int i = 0; i < octaves; i++)
+            {
+                //get position of perlin noise sample
+                float xCoord = (float)posX / xSize * frequency * perlinScale + offsets[i].x;
+                float zCoord = (float)posZ / zSize * frequency * perlinScale + offsets[i].y;
 
-            float perlinValue = Mathf.PerlinNoise(xCoord, zCoord) * 2 - 1; //get value on a scale of -1 tp 1
-            height += perlinValue * amplitude; //add height from octave to result
+                float perlinValue = Mathf.PerlinNoise(xCoord, zCoord) * 2 - 1; //get value on a scale of -1 tp 1
+                height += perlinValue * amplitude; //add height from octave to result
 
-            frequency *= lacunarity; //increase the frequency of changes with each octave
-            amplitude *= persistance; //decrease magnitude of changes with each octave
-        } 
+                frequency *= lacunarity; //increase the frequency of changes with each octave
+                amplitude *= persistance; //decrease magnitude of changes with each octave
+            }
+        }
+
+        //applying falloff
+        height -= falloffMap[posX, posZ];
+
+        //applying bounds
+        Mathf.Clamp(height, minHeight, maxHeight);
 
         return height;
     }
+
+    private float[,] GenerateFalloffMap()
+    {
+        //declaring map
+        float[,] falloffMap = new float[xSize + 1, zSize + 1];
+
+        //loop through creation falloff
+        for (int z=0; z<= zSize; z++)
+        {
+            for (int x = 0; x <= xSize; x++)
+            {
+                //generate falloff for each side and determine which is closest
+                float xFalloff = (float)x / xSize * 2 - 1;
+                float zFalloff = (float)z / zSize * 2 - 1;
+                float falloff = Mathf.Max(Mathf.Abs(zFalloff), Mathf.Abs(xFalloff));
+
+                //Debug.Log(x + "," + z);
+                //apply curve and store value
+                falloffMap[x,z] = ApplyFalloffCurve(falloff);
+            }
+        }
+
+        return falloffMap;
+    }
+
+    //function that applyes a falloff curve to the falloff generation
+    private float ApplyFalloffCurve(float x)
+    {
+        return Mathf.Pow(x, falloffExponent) / (Mathf.Pow(x, falloffExponent) + Mathf.Pow(falloffMultiplier - x * falloffMultiplier, falloffExponent)); ;
+    }
+
+
 }
