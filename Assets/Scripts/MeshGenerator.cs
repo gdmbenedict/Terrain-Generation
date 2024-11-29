@@ -42,6 +42,7 @@ public class MeshGenerator : MonoBehaviour
     private Vector3[] vertices; //all coordinates for the texture
     private int[] triangles; //all the tris the mesh is made of
     private Color[] colors;
+    private Vector3 position;
 
     // Start is called before the first frame update
     void Start()
@@ -60,6 +61,14 @@ public class MeshGenerator : MonoBehaviour
     public void GenerateTerrain()
     {
         CreateMesh();
+
+        //move terrain to correct position;
+        float posX = -xSize * 0.5f;
+        float posY = maxHeight * 0.5f * verticalScale;
+        float posZ = -zSize * 0.5f;
+        position = new Vector3(posX, posY, posZ);
+        transform.position = position;
+
         GenerateWater();
     }
 
@@ -100,7 +109,7 @@ public class MeshGenerator : MonoBehaviour
         for (int i = 0; i < octaves; i++)
         {
             persistanceFactor += MathF.Pow(persistance, i);
-            Debug.Log(persistanceFactor);
+            //Debug.Log(persistanceFactor);
         }
         minHeight = -persistanceFactor;
         maxHeight = persistanceFactor;
@@ -275,18 +284,26 @@ public class MeshGenerator : MonoBehaviour
 
         //find offset and instantiate object and parent to self
         waterOffset = new Vector2(xSize * 0.001f, zSize * 0.001f);
-        waterInstance = Instantiate(waterVisual, gameObject.transform);
+        waterInstance = Instantiate(waterVisual, Vector3.zero, Quaternion.identity);
 
         //setting position
-        Vector3 pos = new Vector3(waterOffset.x, minHeight * verticalScale, waterOffset.y);
+        Vector3 pos = new Vector3(waterOffset.x + position.x, minHeight * 0.5f * verticalScale, waterOffset.y + position.z);
         waterInstance.transform.position = pos;
 
         //scale wate visual
         float xScale = xSize - 2 * waterOffset.x;
-        float yScale = waterLevel - minHeight * verticalScale;
+        float yScale = waterLevel - minHeight * 0.5f * verticalScale;
         float zScale = zSize - 2 * waterOffset.y;
         waterInstance.transform.localScale = new Vector3(xScale, yScale, zScale);
     }
 
+    public float GetSize()
+    {
+        return Mathf.Max(xSize, zSize);
+    }
 
+    public float GetHeight()
+    {
+        return maxHeight * verticalScale;
+    }
 }
