@@ -229,7 +229,10 @@ public class MeshGenerator : MonoBehaviour
         }
 
         //applying falloff
-        height -= falloffMap[posX, posZ];
+        if (applyFalloff)
+        {
+            height -= falloffMap[posX, posZ];
+        }
 
         //applying bounds
         if (height < minHeight)
