@@ -67,7 +67,7 @@ public class MeshGenerator : MonoBehaviour
         float posY = maxHeight * 0.5f * verticalScale;
         float posZ = -zSize * 0.5f;
         position = new Vector3(posX, posY, posZ);
-        transform.position = position;
+        transform.localPosition = position;
 
         GenerateWater();
     }
@@ -284,11 +284,11 @@ public class MeshGenerator : MonoBehaviour
 
         //find offset and instantiate object and parent to self
         waterOffset = new Vector2(xSize * 0.001f, zSize * 0.001f);
-        waterInstance = Instantiate(waterVisual, Vector3.zero, Quaternion.identity);
+        waterInstance = Instantiate(waterVisual,transform);
 
         //setting position
-        Vector3 pos = new Vector3(waterOffset.x + position.x, minHeight * 0.5f * verticalScale, waterOffset.y + position.z);
-        waterInstance.transform.position = pos;
+        Vector3 pos = new Vector3(waterOffset.x, minHeight * verticalScale, waterOffset.y);
+        waterInstance.transform.localPosition = pos;
 
         //scale wate visual
         float xScale = xSize - 2 * waterOffset.x;
